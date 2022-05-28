@@ -28,7 +28,6 @@ font-size: 16px;
 color: #afafaf;
 cursor: pointer;
 background: #00000000;
-display: block;
 padding: 6px 8px;
 "
 onMouseOver="this.style.background='#E5E5E5'"
@@ -39,7 +38,7 @@ const newContainer = () => {
   const ctr = document.createElement('span');
   ctr.id = 'hide-hint-ctr';
   ctr.innerHTML = `
-    <span>Translate what you hear. No hints! 🙈</span>
+    <span>Translate what you hear.</span>
     <button ${fancyButtonStyles} id="toggleHint">Show Hint</button>
   `;
   return ctr;
@@ -48,15 +47,15 @@ const newContainer = () => {
   // *What* to Do
   const hideHintSentenceIfExists = () => {
     const selectors = {
-      translatePrompt: '[data-test=\'challenge-translate-prompt\']',
-    hintSentence: '[data-test=\'hint-sentence\']',
+      translatePrompt: '[data-test=\'challenge challenge-translate\']',
+    hintSentence: '[data-test=\'hint-token\']',
+    blameCorrect: '[data-test=\'blame blame-correct\']',
     hideHintText: '#hide-hint-ctr span',
     hideHintButton: '#hide-hint-ctr button',
   }
   const hasTranslateTest = document.querySelector(selectors.translatePrompt) !== null;
-
   if (hasTranslateTest) {
-    const hintSentence = document.querySelector(selectors.hintSentence);
+	    const hintSentence = document.querySelector(selectors.hintSentence);
     
     // Check to see if
     // 1) the node exists and
@@ -65,26 +64,36 @@ const newContainer = () => {
     // an audio prompt
     if (
       hintSentence !== null 
-      && hintSentence.parentElement.children.length === 2
+      && hintSentence.parentElement.parentElement.children.length === 2
       ) {
-        hintSentence.parentElement.appendChild(newContainer());
-        hintSentence.style.display = 'none';
+        hintSentence.parentElement.parentElement.appendChild(newContainer());
+        hintSentence.parentElement.style.display = 'none';
       const hideHintText = document.querySelector(selectors.hideHintText);
       const hideHintButton = document.querySelector(selectors.hideHintButton);
       const onToggle = () => {
         if (isHiding) {
-          hintSentence.style.display = 'initial';
-          hideHintText.style.display = 'none';
+          hintSentence.parentElement.style.display = 'initial';
+          hideHintText.parentElement.style.display = 'none';
           hideHintButton.innerHTML = 'Hide Hint';
         } else {
-          hintSentence.style.display = 'none';
-          hideHintText.style.display = 'initial';
+          hintSentence.parentElement.style.display = 'none';
+          hideHintText.parentElement.style.display = 'initial';
           hideHintButton.innerHTML = 'Show Hint';
         }
         isHiding = !isHiding;
       }
       document.querySelector(selectors.hideHintButton).onclick = onToggle;
 
+    }
+    
+    const hasAnsweredCorrectly = document.querySelector(selectors.blameCorrect) !== null;
+    if (hasAnsweredCorrectly) {
+    	const hintSentence = document.querySelector(selectors.hintSentence);
+ 	    const hideHintText = document.querySelector(selectors.hideHintText);
+     	const hideHintButton = document.querySelector(selectors.hideHintButton);
+        hintSentence.parentElement.style.display = 'initial';
+        hideHintText.parentElement.style.display = 'none';
+     	hideHintButton.style.display = 'none';
     }
   } 
 }
@@ -113,6 +122,7 @@ const attachObserverToNode = () => {
 // Poll for change in address
 let oldPathname = null;
 setInterval(() => {
+
   const curPathname = window.location.pathname;
 
   if (oldPathname !== curPathname) {
